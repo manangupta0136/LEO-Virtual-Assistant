@@ -1,0 +1,18 @@
+{
+    "conversations": [
+        {
+            "role": "user",
+            "parts": [
+                "hello"
+            ]
+        },
+        {
+            "role": "model",
+            "parts": [
+                "Hello there! How can I help you today?\n"
+            ]
+        }
+    ],
+    "last_targets": {},
+    "custom_context": {}
+}

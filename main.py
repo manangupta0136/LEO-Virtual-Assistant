@@ -5,7 +5,7 @@ from voice_io.speech_output import speak
 from agents.classifier_agent import classify_command
 from agents.thinking_brain_agent import think_and_reply
 from agents.thinking_body_agent import execute_command
-from agents.memory_agent import handle_memory  # <-- IMPORT THE NEW AGENT
+from agents.memory_agent import handle_memory
 from agents.speech_agent import polish_speech
 from gui import LEO_GUI
 import tkinter as tk
@@ -47,7 +47,7 @@ def classify_and_respond(command, should_speak=True):
     elif task_type == "thinking_body":
         response = execute_command(command)
         print(f"🤖 Body: {response}")
-    elif task_type == "memory_agent": # <-- NEW LOGIC BRANCH
+    elif task_type == "memory_agent":
         response = handle_memory(command)
         print(f"💾 Memory: {response}")
     else:
@@ -62,31 +62,37 @@ def classify_and_respond(command, should_speak=True):
 
 def run_leo(gui):
     """The main application loop for LEO."""
+    gui.add_to_chat_window("LEO", "Session started. I'm ready for your command.")
     while True:
         gui.update_status("Listening...")
         user_input = listen()
 
         if user_input: # Only process if listen() returned text
+            # Add user's command to the chat window
+            gui.add_to_chat_window("You", user_input)
+            
             # Check for the stop command
             if user_input.strip().lower() == "stop":
                 gui.update_status("Stopped")
-                gui.update_response("🛑 LEO has stopped.")
-                speak("LEO has stopped.")
+                response = "LEO has stopped."
+                speak(response)
+                gui.add_to_chat_window("LEO", f"🛑 {response}")
+                gui.start_button.config(state=tk.NORMAL, text="Start LEO") # Re-enable button
                 break
 
-            gui.update_user_input(user_input)
             gui.update_status("Processing...")
-
             response = classify_and_respond(user_input, gui.should_speak())
-            gui.update_response(response)
 
+            # Add LEO's response to the chat window
+            gui.add_to_chat_window("LEO", response)
             gui.update_status("Idle")
         else:
-            # If listen() returns nothing (e.g., error or silence), just loop back
-            gui.update_status("Idle")
+            # If listen() returns nothing (e.g., error or silence), update status
+            gui.update_status("Listening Error. Try again.")
 
 
 if __name__ == "__main__":
     root = tk.Tk()
     gui = LEO_GUI(root, run_leo)
+    gui.add_to_chat_window("LEO", "Hello! I'm LEO. Click 'Start LEO' to begin.")
     root.mainloop()
